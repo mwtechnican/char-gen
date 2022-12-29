@@ -1,0 +1,22 @@
+<h1>Dein DSA-Charakter</h1>
+<p>Name: {{ name }}</p>
+<p>Rasse: {{ race }}</p>
+<p>Beruf: {{ profession }}</p>
+<td>Charaktereigenschaften: </td>
+<ul>
+  {% for item in character_traits %}
+      <li><a> {{ item }}</a></li>
+  {% endfor %}
+</ul>
+<table>
+  <tr>
+    <th>Attribut</th>
+    <th>Wert</th>
+  </tr>
+  {% for attribute in attributes %}
+  <tr>
+    <td>{{ attribute }}</td>
+    <td>{{ attribute_values[attribute] }}</td>
+  </tr>
+  {% endfor %}
+</table>

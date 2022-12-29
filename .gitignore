@@ -1,4 +1,2 @@
-
-rpg-generator/node_modules/*
-flask/venv/*
-flask/__pycache__/*
+venv/*
+__pycache__/*

@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  dsa-generator: 
+
+  hier muss noch code hin
+
+  soll auf ./app zugreifen für app.py

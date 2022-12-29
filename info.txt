@@ -1,2 +1,6 @@
 https://pythonbasics.org/flask-tutorial-hello-world/
 https://flask.palletsprojects.com/en/2.2.x/
+https://github.com/docker/awesome-compose/tree/master/flask
+
+# redis 
+https://runnable.com/docker/python/docker-compose-with-flask-apps

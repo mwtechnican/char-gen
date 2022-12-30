@@ -1,2 +1,5 @@
 app/venv/*
 app/__pycache__/*
+secrets
+data/portainer
+data/traefik/letsencrypt

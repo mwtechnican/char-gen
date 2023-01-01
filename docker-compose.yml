@@ -79,6 +79,8 @@ services:
     restart: "unless-stopped"
     depends_on:
       - traefik
+    volumes:
+      - "${dockerdir}/app:/app"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dsa-generator.rule=Host(\"dsa.${domain}\") || Host(\"${domain1}\") || Host(\"${domain2}\")"

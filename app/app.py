@@ -2,7 +2,7 @@
 import random
 from flask import Flask, render_template
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templateFiles', static_folder='staticFiles')
 port = 5000
 
 @app.route('/')

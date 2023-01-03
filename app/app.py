@@ -87,5 +87,11 @@ def generate_character():
     # generate html code
     return render_template('character.html', attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
 
+@app.route('/health')
+def generate_character():
+
+    # generate html code
+    return render_template('health.html')
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=port)

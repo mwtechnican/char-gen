@@ -1,75 +1,5 @@
 version: '3.9'
-networks:
-  proxynet:
-    name: "proxynet"
-secrets:
-  duckdns_api_key:
-    file: ${dockerdir}/secrets/duckdns_api_key
 services:
-  traefik:
-    image: "traefik:latest"
-    container_name: "traefik"
-    hostname: "traefik"
-    restart: "unless-stopped"
-    command:
-      - "--log.level=Error"
-      ### docker provider ###
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.watch=true"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.network=proxynet"
-      ### entrypoints ###
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.tls=true"
-      - "--entrypoints.websecure.http.tls.certResolver=leresolver"
-      - "--entrypoints.websecure.http.tls.domains[0].main=${domain1}"
-      - "--entrypoints.websecure.http.tls.domains[0].sans=${domain2}"
-      ## certificateresolvers ###
-      - "--certificatesresolvers.leresolver.acme.dnschallenge.provider=duckdns"
-      - "--certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0"
-      - "--certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-      # - "--certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # testing
-      - "--certificatesresolvers.leresolver.acme.email=${le_mail}"
-      - "--certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.leresolver.acme.keytype=RSA4096"
-    environment:
-      - "DUCKDNS_TOKEN_FILE=/run/secrets/duckdns_api_key"
-    secrets:
-      - "duckdns_api_key"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "${dockerdir}/data/traefik/letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${dockerdir}/data/traefik/shared:/shared"
-    networks:
-      proxynet:
-    dns:
-      - "${dnsserver}"
-  portainer:
-    image: "portainer/portainer-ce:latest"
-    container_name: "portainer"
-    hostname: "portainer"
-    restart: "unless-stopped"
-    depends_on:
-      - traefik
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "${dockerdir}/data/portainer:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(\"ubudev.${domain}\")"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - "traefik.http.routers.portainer.entrypoints=websecure"
-    networks:
-      proxynet:
-    dns:
-      - "${dnsserver}"
   dsa-generator:
     build:
       context: ./
@@ -77,16 +7,5 @@ services:
     container_name: "dsa-generator"
     hostname: "dsa-generator"
     restart: "unless-stopped"
-    depends_on:
-      - traefik
-    volumes:
-      - "${dockerdir}/app:/app"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dsa-generator.rule=Host(\"dsa.${domain}\") || Host(\"${domain1}\") || Host(\"${domain2}\")"
-      - "traefik.http.services.dsa-generator.loadbalancer.server.port=5000"
-      - "traefik.http.routers.dsa-generator.entrypoints=websecure"
-    networks:
-      proxynet:
-    dns:
-      - "${dnsserver}"
+    ports:
+      - 5000:5000

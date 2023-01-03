@@ -88,7 +88,7 @@ def generate_character():
     return render_template('character.html', attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
 
 @app.route('/health')
-def generate_character():
+def generate_health():
 
     # generate html code
     return render_template('health.html')

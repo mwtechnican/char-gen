@@ -3,4 +3,4 @@ COPY ./app /app
 ADD . /app
 WORKDIR /app
 RUN pip install -r app/requirements.txt
-CMD python /app/app.py
+CMD waitress-serve --host 0.0.0.0 app:app

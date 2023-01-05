@@ -1,11 +1,11 @@
 # from random import randint, choice
 import random
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__, template_folder='templateFiles', static_folder='staticFiles')
 port = 5000
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def generate_character():
     # Name 
     male_names =['Arndt', 'Bartolf', 'Carsten', 'Dorn','Eberhard','Fabian','Gernot','Hagen','Ingolf','Jörg']
@@ -84,6 +84,12 @@ def generate_character():
     all_character_traits = positiv_traits + negativ_traits
     character_traits = random.sample(all_character_traits, 3)
 
+    if request.method == 'POST':
+        if request.form.get('action_regenerate') == 'erneut generieren"':
+            return render_template('character.html', form=request.form, attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
+    elif request.method == 'GET':
+        return render_template('character.html', form=request.form, attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
+    
     # generate html code
     return render_template('character.html', attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
 

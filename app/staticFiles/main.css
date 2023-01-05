@@ -16,3 +16,8 @@ p {
     font-size: 1.2em;
     color: DarkSlateGray;
 }
+
+input[type=submit] {
+    width: max-content;
+    border: 2.5px thin #555;
+} 

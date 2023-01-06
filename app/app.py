@@ -1,16 +1,14 @@
-# imports
 import random
 import openai
 import os
 import json
 from flask import Flask, render_template, request, redirect
 
-# variables
 app = Flask(__name__, template_folder='templateFiles',
             static_folder='staticFiles')
 port = 5000
 
-# functions
+
 def read_secrets(file) -> dict:
     filename = os.path.join(file)
     try:
@@ -19,9 +17,11 @@ def read_secrets(file) -> dict:
     except FileNotFoundError:
         return {}
 
+
 def view_health():
     # generate html code
     return render_template('health.html')
+
 
 def get_character_description(prompt, openai_api_key):
     # Set the API key
@@ -44,6 +44,7 @@ def get_character_description(prompt, openai_api_key):
     # Print the response
     return completions.choices[0].text
 
+
 def select_character_name(gender):
     male_names = ['Arndt', 'Bartolf', 'Carsten', 'Dorn',
                   'Eberhard', 'Fabian', 'Gernot', 'Hagen', 'Ingolf', 'Jörg']
@@ -59,14 +60,17 @@ def select_character_name(gender):
         name = random.choice(all_names)
     return name
 
-def select_character_race():
-    races = ['Mensch', 'Elf', 'Zwerg', 'Halbelf',
-             'Halbling', 'Ork', 'Troll', 'Goblin', 'Nachelfen']
-    return random.choice(races)
+
+def select_character_nation():
+    nations = ['Mensch', 'Elf', 'Zwerg', 'Halbelf',
+               'Halbling', 'Ork', 'Troll', 'Goblin', 'Nachelfen']
+    return random.choice(nations)
+
 
 def select_character_profession():
     professions = ['Krieger', 'Magier', 'Dieb', 'Druide', 'Barden', 'Priester']
     return random.choice(professions)
+
 
 def select_character_trait(count):
     positiv_traits = [
@@ -124,6 +128,7 @@ def select_character_trait(count):
     all_character_traits = positiv_traits + negativ_traits
     return random.sample(all_character_traits, count)
 
+
 def generate_character_attributes():
     attrib_start = 5
     attrib_end = 18
@@ -140,35 +145,35 @@ def generate_character_attributes():
     }
     return attributes
 
-# code
+
 secrets = read_secrets('secrets.json')
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-  return render_template('base.html')
-    # return redirect("/generate")
+
+@app.route('/', methods=['GET'])
+def home():
+    return render_template('home.html')
+
 
 @app.route('/description', methods=['GET'])
 def description():
     prompt = "wie ist das wetter heute?"
     return render_template('description.html', text=get_character_description(openai_api_key=secrets["openai_api_key"], prompt=prompt))
 
+
 @app.route('/generate', methods=['GET', 'POST'])
 def generate():
     character = {
         "name": select_character_name("any"),
-        "race": select_character_race(),
+        "nation": select_character_nation(),
         "profession": select_character_profession(),
         "traits": select_character_trait(5),
         "attributes": generate_character_attributes()
     }
 
     if request.method == 'POST':
-        if request.form.get('action_regenerate') == 'erneut generieren"':
+        if request.form.get('action_generate_char') == 'generieren' or request.form.get('action_generate_char') == 'erneut generieren':
             html = render_template(
                 'character.html', form=request.form, character=character)
-        elif request.form.get('action_generate_description') == 'Charakterbeschreibung generieren':
-            html = render_template('health.html')
     elif request.method == 'GET':
         html = render_template(
             'character.html', form=request.form, character=character)
@@ -176,9 +181,16 @@ def generate():
     # generate html code
     return html
 
-@app.route('/health')
+
+@app.route('/about', methods=['GET'])
+def about():
+    return view_health()
+
+
+@app.route('/health', methods=['GET'])
 def health():
     return view_health()
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=port)

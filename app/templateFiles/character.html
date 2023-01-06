@@ -1,47 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <!--  Load CSS in Flask with html-->
-  <link rel="stylesheet" href='/staticFiles/main.css' />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
-  <!--  Load JavaScript in Flask with html-->
-
-  <!--
-    <script>
-      alert("Diese Seite hat keinen Anspruch an Verfügbarkeit und Stabilität!")
-    </script>
-    -->
-
-</head>
-
-<body>
-  <h1>Dein DSA-Charakter</h1>
-  <p>Name: {{ character["name"] }}</p>
-  <p>Rasse: {{ character["race"] }}</p>
-  <p>Beruf: {{ character["profession"] }}</p>
-  <p>Charaktereigenschaften: </p>
-  <ul>
-    {% for item in character["traits"] %}
-    <li><a> {{ item }}</a></li>
-    {% endfor %}
-  </ul>
-  <p>Attribute: </p>
-  <table>
-    {% for key, value in character["attributes"].items() %}
-    <tr>
-      <td>{{ key }}</td>
-      <td>{{ value }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  <h2>Optionen</h2>
-  <form method="post" action="/">
-    <input type="submit" value="erneut generieren" name="action_regenerate" />
-    <input type="submit" value="Charakterbeschreibung generieren" name="action_generate_description" />
-  </form>
-</body>
-
-</html>
+{% extends 'base.html' %}
+{% block title %} Charakter {% endblock %}
+{% block content %}
+<h1>Generierter Charakter</h1>
+<p>Name: {{ character["name"] }}</p>
+<p>Volk: {{ character["nation"] }}</p>
+<p>Beruf: {{ character["profession"] }}</p>
+<p>Eigenschaften: </p>
+<ul>
+  {% for item in character["traits"] %}
+  <li><a> {{ item }}</a></li>
+  {% endfor %}
+</ul>
+<p>Attribute: </p>
+<table>
+  {% for key, value in character["attributes"].items() %}
+  <tr>
+    <td>{{ key }}</td>
+    <td>{{ value }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<h2>Optionen</h2>
+<form method="post" action="/generate">
+  <input type="submit" value="erneut generieren" name="action_generate_char" />
+</form>
+{% endblock %}

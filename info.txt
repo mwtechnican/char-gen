@@ -8,3 +8,6 @@ https://runnable.com/docker/python/docker-compose-with-flask-apps
 # code examples
 https://github.com/miguelgrinberg/flask-examples
 https://github.com/helloflask/flask-examples
+
+# secret management 
+https://savelev.medium.com/best-practice-how-to-store-secrets-and-settings-in-python-project-e3ee45b3094c

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %} Landing Page {% endblock %}
+{% block content %}
+<h1>Charakter Generator</h1>
+<p>Diese Seite kann genutzt werden werden um sich einen Charakter genierieren zu lassen, dabei werden Werte für Name,
+    Volk, Beruf, Eigenschaften, Attribute automatisch generiert</p>
+<form method="post" action="/generate">
+    <input type="submit" value="generieren" name="action_generate_char" />
+</form>
+{% endblock %}

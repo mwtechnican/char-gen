@@ -23,28 +23,6 @@ def view_health():
     return render_template('health.html')
 
 
-def get_character_description(prompt, openai_api_key):
-    # Set the API key
-    openai.api_key = openai_api_key
-
-    # Set the request data
-    model_engine = "text-davinci-002"
-    prompt = (f"{prompt}\n")
-
-    completions = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=4000,  # higher supports larger output
-        temperature=0.5,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
-
-    # Print the response
-    return completions.choices[0].text
-
-
 def select_character_name(gender):
     male_names = ['Arndt', 'Bartolf', 'Carsten', 'Dorn',
                   'Eberhard', 'Fabian', 'Gernot', 'Hagen', 'Ingolf', 'Jörg']
@@ -146,6 +124,28 @@ def generate_character_attributes():
     return attributes
 
 
+def generate_character_description(prompt, openai_api_key):
+    # Set the API key
+    openai.api_key = openai_api_key
+
+    # Set the request data
+    model_engine = "text-davinci-002"
+    prompt = (f"{prompt}\n")
+
+    completions = openai.Completion.create(
+        engine=model_engine,
+        prompt=prompt,
+        max_tokens=4000,  # higher supports larger output
+        temperature=0.5,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+
+    # Print the response
+    return completions
+
+
 secrets = read_secrets('secrets.json')
 
 
@@ -154,20 +154,31 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/description', methods=['GET'])
-def description():
-    prompt = "wie ist das wetter heute?"
-    return render_template('description.html', text=get_character_description(openai_api_key=secrets["openai_api_key"], prompt=prompt))
-
-
 @app.route('/generate', methods=['GET', 'POST'])
 def generate():
+    name = select_character_name("any")
+    nation = select_character_nation()
+    profession = select_character_profession()
+    traits = select_character_trait(5)
+    attributes = generate_character_attributes()
+
+    """
+    traits_string: str = ""
+    for trait in traits:
+        traits_string = traits_string + ", " + trait
+
+    description_prompt: str = "Beschreibe einen DSA-Charakter mit den folgenden Eigenschaften: Name:", name, ", Volk: ", nation, ", Beruf: ", profession, "Eigenschaften: ", traits_string
+    description = generate_character_description(
+        openai_api_key=secrets["openai_api_key"], prompt=description_prompt)
+    """
+
     character = {
-        "name": select_character_name("any"),
-        "nation": select_character_nation(),
-        "profession": select_character_profession(),
-        "traits": select_character_trait(5),
-        "attributes": generate_character_attributes()
+        "name": name,
+        "nation": nation,
+        "profession": profession,
+        "traits": traits,
+        "attributes": attributes,
+        # "description": description
     }
 
     if request.method == 'POST':
@@ -180,11 +191,6 @@ def generate():
 
     # generate html code
     return html
-
-
-@app.route('/about', methods=['GET'])
-def about():
-    return view_health()
 
 
 @app.route('/health', methods=['GET'])

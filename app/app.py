@@ -1,34 +1,74 @@
-# from random import randint, choice
+# imports
 import random
+import openai
+import os
+import json
 from flask import Flask, render_template, request, redirect
 
-app = Flask(__name__, template_folder='templateFiles', static_folder='staticFiles')
+# variables
+app = Flask(__name__, template_folder='templateFiles',
+            static_folder='staticFiles')
 port = 5000
 
-@app.route('/', methods=['GET', 'POST'])
-def generate_character():
-    # Name 
-    male_names =['Arndt', 'Bartolf', 'Carsten', 'Dorn','Eberhard','Fabian','Gernot','Hagen','Ingolf','Jörg']
-    female_names = ['Adelheid', 'Beatrice', 'Carla', 'Dorothea', 'Elke', 'Friederike', 'Gisela', 'Hildegard', 'Ingrid', 'Johanna']
-    all_names = male_names + female_names
-    name = random.choice(all_names)
+# functions
+def read_secrets(file) -> dict:
+    filename = os.path.join(file)
+    try:
+        with open(filename, mode='r') as f:
+            return json.loads(f.read())
+    except FileNotFoundError:
+        return {}
 
-    # Rasse
-    races =['Mensch', 'Elf', 'Zwerg', 'Halbelf', 'Halbling', 'Ork','Troll', 'Goblin', 'Nachelfen']
-    race = random.choice(races)
+def view_health():
+    # generate html code
+    return render_template('health.html')
 
-    # Beruf
+def get_character_description(prompt, openai_api_key):
+    # Set the API key
+    openai.api_key = openai_api_key
+
+    # Set the request data
+    model_engine = "text-davinci-002"
+    prompt = (f"{prompt}\n")
+
+    completions = openai.Completion.create(
+        engine=model_engine,
+        prompt=prompt,
+        max_tokens=4000,  # higher supports larger output
+        temperature=0.5,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+
+    # Print the response
+    return completions.choices[0].text
+
+def select_character_name(gender):
+    male_names = ['Arndt', 'Bartolf', 'Carsten', 'Dorn',
+                  'Eberhard', 'Fabian', 'Gernot', 'Hagen', 'Ingolf', 'Jörg']
+    female_names = ['Adelheid', 'Beatrice', 'Carla', 'Dorothea',
+                    'Elke', 'Friederike', 'Gisela', 'Hildegard', 'Ingrid', 'Johanna']
+
+    if gender == "male":
+        name = random.choice(male_names)
+    elif gender == "female":
+        name = random.choice(female_names)
+    elif gender == "any":
+        all_names = male_names + female_names
+        name = random.choice(all_names)
+    return name
+
+def select_character_race():
+    races = ['Mensch', 'Elf', 'Zwerg', 'Halbelf',
+             'Halbling', 'Ork', 'Troll', 'Goblin', 'Nachelfen']
+    return random.choice(races)
+
+def select_character_profession():
     professions = ['Krieger', 'Magier', 'Dieb', 'Druide', 'Barden', 'Priester']
-    profession = random.choice(professions)
+    return random.choice(professions)
 
-    # Attribute
-    attributes = ['Stärke', 'Geschicklichkeit', 'Intuition', 'Charisma', 'Konstitution', 'Intelligenz', 'Willenskraft']
-    attribute_values = {}
-    for attribute in attributes:
-        attribute_values[attribute] = random.randint(8, 18)
-
-    # Character traits
-    # https://www.jolie.de/leben/positive-charaktereigenschaften-liste-von-bis-z-210373.html#210373_2a6bae_Positive_Charaktereigenschaften_Liste_von_A_bis_Z
+def select_character_trait(count):
     positiv_traits = [
         'abenteuerlustig', 'achtsam', 'aktiv', 'akribisch', 'ambitioniert', 'anpassungsfähig', 'aufgeschlossen', 'außergewöhnlich', 'autark',
         'barmherzig', 'begeisterungsfähig', 'behutsam', 'belastbar', 'bemüht', 'bescheiden', 'bodenständig',
@@ -80,24 +120,65 @@ def generate_character():
         'verantwortungslos', 'verbittert', 'verletzend', 'verlogen', 'verständnislos', 'verwöhnt', 'voreingenommen', 'vorlaut',
         'waghalsig', 'wankelmütig', 'wehmütig', 'wichtigtuerisch', 'widersprüchlich', 'willensschwach',
         'zaghaft', 'zerstörerisch', 'ziellos', 'zweifelnd',
-    ] 
+    ]
     all_character_traits = positiv_traits + negativ_traits
-    character_traits = random.sample(all_character_traits, 3)
+    return random.sample(all_character_traits, count)
+
+def generate_character_attributes():
+    attrib_start = 5
+    attrib_end = 18
+    attributes = {
+        'Stärke': random.randint(attrib_start, attrib_end),
+        'Geschicklichkeit': random.randint(attrib_start, attrib_end),
+        'Intuition': random.randint(attrib_start, attrib_end),
+        'Charisma': random.randint(attrib_start, attrib_end),
+        'Konstitution': random.randint(attrib_start, attrib_end),
+        'Intelligenz': random.randint(attrib_start, attrib_end),
+        'Willenskraft': random.randint(attrib_start, attrib_end),
+        'Stärke': random.randint(attrib_start, attrib_end),
+        'Stärke': random.randint(attrib_start, attrib_end),
+    }
+    return attributes
+
+# code
+secrets = read_secrets('secrets.json')
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+  return render_template('base.html')
+    # return redirect("/generate")
+
+@app.route('/description', methods=['GET'])
+def description():
+    prompt = "wie ist das wetter heute?"
+    return render_template('description.html', text=get_character_description(openai_api_key=secrets["openai_api_key"], prompt=prompt))
+
+@app.route('/generate', methods=['GET', 'POST'])
+def generate():
+    character = {
+        "name": select_character_name("any"),
+        "race": select_character_race(),
+        "profession": select_character_profession(),
+        "traits": select_character_trait(5),
+        "attributes": generate_character_attributes()
+    }
 
     if request.method == 'POST':
         if request.form.get('action_regenerate') == 'erneut generieren"':
-            return render_template('character.html', form=request.form, attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
+            html = render_template(
+                'character.html', form=request.form, character=character)
+        elif request.form.get('action_generate_description') == 'Charakterbeschreibung generieren':
+            html = render_template('health.html')
     elif request.method == 'GET':
-        return render_template('character.html', form=request.form, attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
-    
+        html = render_template(
+            'character.html', form=request.form, character=character)
+
     # generate html code
-    return render_template('character.html', attributes=attributes, attribute_values=attribute_values, profession=profession, race=race, name=name, character_traits=character_traits)
+    return html
 
 @app.route('/health')
-def generate_health():
-
-    # generate html code
-    return render_template('health.html')
+def health():
+    return view_health()
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=port)
